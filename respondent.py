@@ -5,7 +5,35 @@ import numpy as np
 total_respondents = 0
 
 class Respondent:
+    """
+    A class representing a single 
+    ...
 
+    Attributes
+    ----------
+    items: list
+        a list containing all of the LEAS items belonging to the Respondent.
+    id: int
+        a unique number representing the respondent.
+    wordlist: Wordlist
+        The wordlist objetc used to produce the associated scores.
+    totals: dict
+        a dictionary containing the sums of all of the scoring methods applied to each member of the items list
+    Methods
+    -------
+    __str__()
+        handles conversion of the respondent to a string object for display
+    to_array()
+        returns all of the respondent data as a numpy array
+    add_item(*sentences)
+        instanciates an new LEAS item and adds it to the items list
+    add_additional_info(id, data)
+        adds a new key, value pair to the totals dict (totals[id] = data)
+    score(*modules)
+        scores all of the respondents items for all of the modules passed to the function
+    add_wordlist(wordlist: Wordlist)
+        sets the wordlist for the respondent and all of its items
+    """
     def __init__(self, wordlist_file=None) -> None:
         
         global total_respondents
@@ -22,45 +50,17 @@ class Respondent:
         self.totals = {}
 
         return
-    
-    def add_item(self, *sentences):
 
-        item = Item(*sentences)
-        item.add_wordlist(self.wordlist)
-        self.items.append(item)
+    def __str__(self) -> str:
+        '''
+        Handles conversion of the Respondent class to a str. Mainly used for display purposes.
 
-        return item
-    
-    
-    def add_additional_info(self, id, data):
+                Parameters:
+                       
+                Returns:
+                        respondent (str): The respondent information as a string
 
-        self.totals[id] = data
-
-
-    def score(self, *modules):
-        
-        for module in modules:
-            if module.type == "per item":
-                #total = 0
-                for item in self.items:
-                    item.score(module)
-                    #total += item.scores[module.id]
-            elif module.type == "per respondent":
-                for item in self.items:
-                    item.scores[module.id] = 0
-                total = module.execute(self.items, self.wordlist)
-            #self.modules_ran.add(module.id)
-                self.totals[module.id] = total
-        for ids in self.items[0].scores.keys():
-            total = 0
-            for item in self.items:
-                total += item.scores[ids]
-            if total != 0 or ids not in self.totals.keys():
-                self.totals[ids] = total
-
-        return
-
-    def __str__(self):
+        '''
         ret = ""
         i = 1
         for item in self.items:
@@ -69,13 +69,15 @@ class Respondent:
             i += 1
         return ret.rstrip()
 
-    def add_wordlist(self, wordlist):
-        self.wordlist = wordlist
-        for item in self.items:
-            item.add_wordlist(wordlist)
+    def to_array(self) -> np.array:
+        '''
+        Handles conversion of the Respondent class to a numpy array. 
 
-    def to_array(self):
-
+                Parameters:
+                       
+                Returns:
+                        respondent (np.array): The respondent information as a numpy array
+        '''
         if len(self.items) == 0:
             return np.empty((0,0))
         
@@ -102,3 +104,84 @@ class Respondent:
             full_data[-1,i] = self.totals[total_name]
 
         return full_data
+
+    def add_item(self, *sentences) -> Item:
+        '''
+        Instanciates a new LEAS item and adds it to the items list.
+
+                Parameters:
+                        sentences (tuple): the sentences that will be used to instanciate the new Item class.
+                Returns:
+                        item (Item): The new item that was created.
+        '''
+        item = Item(*sentences)
+        item.add_wordlist(self.wordlist)
+        self.items.append(item)
+
+        return item
+    
+    
+    def add_additional_info(self, id, data) -> None:
+        '''
+        Adds a new key, value pair to the totals dict (totals[id] = data)
+
+                Parameters:
+                        id (any): the key that will hold data in the totals dict
+                        data (any): the data to be added to the totals dict
+                Returns:
+
+        '''
+        self.totals[id] = data
+
+        return
+
+
+    def score(self, *modules) -> None:
+        '''
+        Scores all of the items in the respondent's items list using all of the specified scoring modules.
+        The modules are applied per item or per respondent as indicated by the module type. The totals are
+        added to the totals dict.
+
+                Parameters:
+                        modules (tuple): the scoring modules to be run on the respondent's items.
+                Returns:
+
+        '''
+        for module in modules:
+            if module.type == "per item":
+                #total = 0
+                for item in self.items:
+                    item.score(module)
+                    #total += item.scores[module.id]
+            elif module.type == "per respondent":
+                for item in self.items:
+                    item.scores[module.id] = 0
+                total = module.execute(self.items, self.wordlist)
+            #self.modules_ran.add(module.id)
+                self.totals[module.id] = total
+        for ids in self.items[0].scores.keys():
+            total = 0
+            for item in self.items:
+                total += item.scores[ids]
+            if total != 0 or ids not in self.totals.keys():
+                self.totals[ids] = total
+
+        return
+
+
+
+    def add_wordlist(self, wordlist: Wordlist) -> None:
+        '''
+        Sets the wordlist that the respondent's items will be scored with
+
+                Parameters:
+                        wordlist (Wordlist): The wordlist object that will be used
+                Returns:
+
+        '''
+        self.wordlist = wordlist
+        for item in self.items:
+            item.add_wordlist(wordlist)
+        return
+
+    
