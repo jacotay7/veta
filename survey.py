@@ -1,13 +1,28 @@
 import openpyxl
-from item import *
-from respondent import *
-from wordlist import *
+
+from item import Item
+from respondent import Respondent
+from wordlist import Wordlist
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 class Survey:
+    """
+    A class representing a single 
+    ...
 
+    Attributes
+    ----------
+    items: list
+        a list containing all of the LEAS items belonging to the Respondent.
+    
+    Methods
+    -------
+    __str__()
+        handles conversion of the respondent to a string object for display
+    
+    """
     def __init__(self, wordlist_file=None) -> None:
         self.respondents = []
         self.wordlist = None
@@ -23,7 +38,7 @@ class Survey:
     def __str__(self) -> str:
         ret = ""
         for respondent in self.respondents:
-            ret += "Respondent ID {}:\n\n".format(respondent.id)
+            # ret += "Respondent ID {}:\n\n".format(respondent.id)
             ret += str(respondent) + '\n\n'
         return ret.rstrip()
 
@@ -108,7 +123,7 @@ class Survey:
         for key in self.summary.keys():
             self.summary[key] = np.array(self.summary[key], dtype=float)
 
-    def add_wordlist(self, wordlist):
+    def add_wordlist(self, wordlist: Wordlist):
         self.wordlist = wordlist
         for respondent in self.respondents:
             respondent.add_wordlist(wordlist)

@@ -6,7 +6,8 @@ total_respondents = 0
 
 class Respondent:
     """
-    A class representing a single 
+    A class representing a single respondent of an LEAS survey. The class includes all of the LEAS items (question responses) 
+    as well as meta data about the respondent (e.g. age, gender, education). 
     ...
 
     Attributes
@@ -48,6 +49,7 @@ class Respondent:
         total_respondents += 1
         #self.modules_ran = set()
         self.totals = {}
+        self.col_names = []
 
         return
 
@@ -61,7 +63,9 @@ class Respondent:
                         respondent (str): The respondent information as a string
 
         '''
-        ret = ""
+        ret = f"Respondent ID {self.id}:\n\n"
+        # ret += "Scores:\n"
+
         i = 1
         for item in self.items:
             ret += "Item {}:\n".format(i)
@@ -81,8 +85,8 @@ class Respondent:
         if len(self.items) == 0:
             return np.empty((0,0))
         
-        if len(self.items[0].scores.keys()) == 0:
-            return np.empty((0,0))
+        # if len(self.items[0].scores.keys()) == 0:
+        #     return np.empty((0,0))
 
         module_names = list(self.items[0].scores.keys())
         total_names = list(self.totals.keys())
@@ -101,8 +105,9 @@ class Respondent:
         
         for i in range(len(total_names)):
             total_name = total_names[i]
+            # print(total_name, total_names)
             full_data[-1,i] = self.totals[total_name]
-
+        self.col_names = total_names
         return full_data
 
     def add_item(self, *sentences) -> Item:
@@ -114,12 +119,15 @@ class Respondent:
                 Returns:
                         item (Item): The new item that was created.
         '''
-        item = Item(*sentences)
-        item.add_wordlist(self.wordlist)
+        if len(sentences) == 1 and isinstance(sentences[0], Item):
+            item = sentences[0]
+        else:
+            item = Item(*sentences)
+            item.add_wordlist(self.wordlist)
         self.items.append(item)
 
         return item
-    
+
     
     def add_additional_info(self, id, data) -> None:
         '''

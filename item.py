@@ -33,7 +33,7 @@ class Item:
     add_wordlist(wordlist: Wordlist)
         sets the wordlist for the item
     """
-    def __init__(self, self_sentence: str, other_sentence: str) -> None:
+    def __init__(self, self_sentence: str, other_sentence: str = "") -> None:
         '''
         Initializes the Item class
 
