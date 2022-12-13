@@ -17,7 +17,7 @@ class Respondent:
     id: int
         a unique number representing the respondent.
     wordlist: Wordlist
-        The wordlist objetc used to produce the associated scores.
+        the wordlist object used to produce the associated scores.
     totals: dict
         a dictionary containing the sums of all of the scoring methods applied to each member of the items list
     Methods
@@ -25,13 +25,13 @@ class Respondent:
     __str__()
         handles conversion of the respondent to a string object for display
     to_array()
-        returns all of the respondent data as a numpy array
+        returns all of the respondent's data as a numpy array
     add_item(*sentences)
-        instanciates an new LEAS item and adds it to the items list
+        instanciates a new LEAS item and adds it to the items list
     add_additional_info(id, data)
         adds a new key, value pair to the totals dict (totals[id] = data)
     score(*modules)
-        scores all of the respondents items for all of the modules passed to the function
+        scores all of the respondent's items for all of the modules passed to the function
     add_wordlist(wordlist: Wordlist)
         sets the wordlist for the respondent and all of its items
     """
