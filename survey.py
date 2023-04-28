@@ -53,6 +53,7 @@ class Survey:
 
         res = Respondent()
         self.add_respondent(res)
+        
         for i in range(data.shape[0]):
             if isinstance(data[i,id_col],float) and np.isnan(data[i,id_col]):
                 for col in self.cols[3:3+self.num_item_cols ]:
@@ -79,7 +80,8 @@ class Survey:
                 for col in self.cols[3:3+self.num_item_cols ]:
                     #print(self.header[col], col,  data[i,col])
                     item.add_additional_info(self.header[col], data[i,col])
-        self.respondents.remove(res)
+        if len(res.items) == 0:
+            self.respondents.remove(res)
         """for col in self.cols[3:3+self.num_item_cols ]:
             total = 0
             for item in res.items:
