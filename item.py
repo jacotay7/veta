@@ -90,7 +90,7 @@ class Item:
                         sentence (str): The cleaned string 
 
         '''
-        sentence = sentence.lower()
+        sentence = str(sentence).lower()
         for c in sentence:
             if c in "-,.?!;:/\n":
                 sentence = sentence.replace(c,' ')
