@@ -35,12 +35,15 @@ class Respondent:
     add_wordlist(wordlist: Wordlist)
         sets the wordlist for the respondent and all of its items
     """
-    def __init__(self, wordlist_file=None) -> None:
+    def __init__(self, userid=None, wordlist_file=None) -> None:
         
         global total_respondents
 
         self.items = []
         self.id = total_respondents
+        self.userid = None
+        if isinstance(userid, str):
+            self.userid = userid
         self.wordlist = None
         if isinstance(wordlist_file, str):
             wordlist = Wordlist(wordlist_file)
@@ -63,7 +66,10 @@ class Respondent:
                         respondent (str): The respondent information as a string
 
         '''
-        ret = f"Respondent ID {self.id}:\n\n"
+        if isinstance(self.userid, str):
+            ret = f"Respondent ID {self.userid}:\n\n"
+        else:
+            ret = f"Respondent ID {self.id}:\n\n"
         # ret += "Scores:\n"
 
         i = 1

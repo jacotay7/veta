@@ -42,11 +42,9 @@ class Survey:
             ret += str(respondent) + '\n\n'
         return ret.rstrip()
 
-    def from_file(self, filename):
+    def from_vertical_layout(self, data):
 
-        data = np.array(pd.read_excel(filename, header = None))
-        self.header = data[0,:]#np.array([data[0,col] for col in self.cols])
-
+        self.header = data[0,:]
         data = data[1:,]
         self.data = data
         id_col, self_col, other_col = self.cols[:3]
@@ -55,7 +53,8 @@ class Survey:
         self.add_respondent(res)
         
         for i in range(data.shape[0]):
-            if isinstance(data[i,id_col],float) and np.isnan(data[i,id_col]):
+            userid = data[i,id_col]
+            if isinstance(userid,float) and np.isnan(userid):
                 for col in self.cols[3:3+self.num_item_cols ]:
                     total = 0
                     for item in res.items:
@@ -70,6 +69,7 @@ class Survey:
                 self.add_respondent(res)
                 
             else:
+                res.userid=str(userid)
                 self_sentence = data[i,self_col]
                 other_sentence = data[i,other_col]
                 if isinstance(self_sentence,float) and np.isnan(self_sentence):
@@ -82,16 +82,46 @@ class Survey:
                     item.add_additional_info(self.header[col], data[i,col])
         if len(res.items) == 0:
             self.respondents.remove(res)
-        """for col in self.cols[3:3+self.num_item_cols ]:
-            total = 0
-            for item in res.items:
-                total += item.scores[self.header[col]]
-            print(self.header[col], total)
-            res.add_additional_info(self.header[col], total)
-        for col in self.cols[3+self.num_item_cols:]:
-            res.add_additional_info(self.header[col], data[i,col])"""
-        
+        return
+
+    def from_horizontal_layout(self, data):
+
+        self.header = data[0,:]
+        data = data[1:,]
+        self.data = data
+        id_col, self_col, other_col = self.cols[:3]
+
+        for i in range(data.shape[0]):
+            userid = data[i,id_col]
+            if isinstance(userid,float) and np.isnan(userid):
+                res = Respondent()
+            else:
+                res = Respondent(userid=str(userid))
+            self.add_respondent(res)
+
+            for j in range(1,data.shape[1],2):
+
+                self_sentence = data[i,j]
+                other_sentence = data[i,j+1]
+                if isinstance(self_sentence,float) and np.isnan(self_sentence):
+                    self_sentence = ""
+                if isinstance(other_sentence,float) and np.isnan(other_sentence):
+                    other_sentence = ""
+                res.add_item(self_sentence,other_sentence)
+
+        return        
+
+    def from_file(self, filename, layout='vertical'):
+
+        data = np.array(pd.read_excel(filename, header = None))
+
+        if str(layout).lower() == "vertical":
+            self.from_vertical_layout(data)
+        elif str(layout).lower() == "horizontal":
+            self.from_horizontal_layout(data)
+
         self.add_wordlist(self.wordlist)
+
         return
     
     def configure_columns(self, id_col, self_col, other_col, per_item_cols, per_res_cols):
@@ -132,25 +162,41 @@ class Survey:
 
     def save(self, filename):
 
+        #Open a new excel workbook
         wb = openpyxl.Workbook()
-        #print(self.data[0,:])
         ws1 = wb.active
         data = self.data
         num_cols = 3
 
+        #Set the header row
         for j in range(num_cols):
             ws1.cell(1, column=j+1).value = self.header[j]
 
+        #Get the module names that have been run and sort them
         respondent_modules = list(self.respondents[0].totals.keys())
         respondent_modules.sort()
 
+        #Write the module names to the columns
         for j in range(len(respondent_modules)):
             ws1.cell(1, column=num_cols+j+1).value = respondent_modules[j]
 
-        for i in range(data.shape[0]):
-            for j in range(num_cols):
-                ws1.cell(row=i+2, column=j+1).value = data[i,j]
+        #Copy the first three columns (Person Self Other)
+        # for i in range(data.shape[0]):
+        #     for j in range(num_cols):
+        #         ws1.cell(row=i+2, column=j+1).value = data[i,j]
+        r = 2
+        for res in self.respondents:
+            for item in res.items:
+                if isinstance(res.userid,str):
+                    ws1.cell(row=r, column=self.cols[0]+1).value = res.userid
+                else:
+                    ws1.cell(row=r, column=self.cols[0]+1).value = res.userid
+                ws1.cell(row=r, column=self.cols[1]+1).value = item.self_sentence
+                ws1.cell(row=r, column=self.cols[2]+1).value = item.other_sentence
+                r += 1
+            r +=1
 
+        #Output all of the results
         current_row = 1
         for respondent in self.respondents:
             full_data = respondent.to_array()
@@ -159,6 +205,7 @@ class Survey:
                     ws1.cell(row=current_row+1, column=j+num_cols+1).value = full_data[i,j]
                 current_row += 1
 
+        #Save the file
         wb.save(filename = filename)
 
     
