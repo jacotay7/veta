@@ -24,7 +24,7 @@ class highestN(ScoringModule):
         Scores a single LEAS item using a given wordlist.
     """
     type = "per item"
-    id = "highestN"
+    # id = "highestN"
 
     def __init__(self, N) -> None:
         '''
@@ -38,6 +38,7 @@ class highestN(ScoringModule):
         '''
         super().__init__()
         self.N = N
+        self.id = "highest{}".format(N)
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:

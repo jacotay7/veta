@@ -65,7 +65,7 @@ class _3345plus(ScoringModule):
         other_matching_high_words = [other_matching_words[i] for i in range(other_matching_words.size) if other_scores[i] > 2]
 
 
-        if other_334 == 4 and other_334 == 4 and set(other_matching_high_words) != set(self_matching_high_words):
+        if self_334 == 4 and other_334 == 4 and set(other_matching_high_words) != set(self_matching_high_words):
             return 5
     
         return max(other_334, self_334)

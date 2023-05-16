@@ -44,6 +44,7 @@ class Item:
                 Returns:
 
         '''
+        self.raw_input = self_sentence +". " + other_sentence
         self.self_sentence = self.clean_sentence(self_sentence)
         self.other_sentence = self.clean_sentence(other_sentence)
         self.scores = {}
@@ -130,3 +131,5 @@ class Item:
         '''
         self.wordlist = wordlist
         return
+    
+

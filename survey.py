@@ -33,6 +33,7 @@ class Survey:
         self.cols = [0,1,2]
         self.num_item_cols = 0
         self.summary = {}
+        self.header = np.array(["ID", "Self", "Other"])
         return
 
     def __str__(self) -> str:
@@ -165,7 +166,7 @@ class Survey:
         #Open a new excel workbook
         wb = openpyxl.Workbook()
         ws1 = wb.active
-        data = self.data
+        # data = self.data
         num_cols = 3
 
         #Set the header row
