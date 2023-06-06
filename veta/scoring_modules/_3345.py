@@ -1,13 +1,14 @@
-from item import Item
-from scoring_modules.scoring_module import *
-from scoring_modules._334 import _334
+from veta.item import Item
+from veta.scoring_modules.scoring_module import *
+from veta.scoring_modules._334 import _334
 
-class _3345plus(ScoringModule):
+class _3345(ScoringModule):
     """
-    A class implementing the 3345plus scoring technique. Child of the ScoringModule class.
-    The 3345plus scoring protocol is the same as the 3345 protocol with the additional constraint
-    that a score of 5 is only given if the `level 3' words in each of the 'self' and 'other' components
-    are unique. i.e. unique sentiments are expressed.
+    A class implementing the 3345 scoring technique. Child of the ScoringModule class.
+    The 3345 scoring protocol requires the item be separated into sections corresponding to 
+    the self and the other. It scores each component using the 334 scoring protocol. The assigned
+    score is the the maximum of both 334 scores, unless both 334 scores have a value of 4, in
+    which case, the assigned score is 5.
 
     ...
 
@@ -24,7 +25,7 @@ class _3345plus(ScoringModule):
         Scores a single LEAS item using a given wordlist.
     """
     type = "per item"
-    id = "3345plus"
+    id = "3345"
 
     def __init__(self) -> None:
         super().__init__()
@@ -32,7 +33,7 @@ class _3345plus(ScoringModule):
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
         '''
-        Scores a single LEAS item using the 3345plus Scoring protocol.
+        Scores a single LEAS item using the 3345 Scoring protocol.
 
                 Parameters:
                         item (Item): The LEAS item to be scored
@@ -59,13 +60,8 @@ class _3345plus(ScoringModule):
             other_334 =  4
         else:
             other_334 =  max(other_scores)
-
-
-        self_matching_high_words = [self_matching_words[i] for i in range(self_matching_words.size) if self_scores[i] > 2]
-        other_matching_high_words = [other_matching_words[i] for i in range(other_matching_words.size) if other_scores[i] > 2]
-
-
-        if self_334 == 4 and other_334 == 4 and set(other_matching_high_words) != set(self_matching_high_words):
+            
+        if other_334 == 4 and other_334 == 4:
             return 5
     
         return max(other_334, self_334)

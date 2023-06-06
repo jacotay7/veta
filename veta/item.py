@@ -1,5 +1,5 @@
-from wordlist import Wordlist
-from scoring_modules.scoring_module import ScoringModule
+from veta.wordlist import Wordlist
+from veta.scoring_modules.scoring_module import ScoringModule
 
 class Item:
     """

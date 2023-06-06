@@ -1,11 +1,12 @@
-from scoring_modules.scoring_module import *
-from item import Item
+from veta.scoring_modules.scoring_module import *
+from veta.scoring_modules._334 import _334
+from veta.item import Item
 
-class highestN_unique(ScoringModule):
+class highestN(ScoringModule):
     """
-    A class implementing the highestN-unique scoring technique. Child of the ScoringModule class.
-    The highestN-unique scoring protocol sums the highest N scores of the unique Wordlist words 
-    in the LEAS item. That is to say, if an item has 10 unique matching words and N is set to 4, the
+    A class implementing the highestN scoring technique. Child of the ScoringModule class.
+    The highestN scoring protocol sums the highest N scores of the Wordlist words that appear
+    in the LEAS item. That is to say, if an item has 10 matching words and N is set to 4, the
     assigned score will correspond to the sum of the largest 4 scores of the 10 matching words.
     
     ...
@@ -23,9 +24,9 @@ class highestN_unique(ScoringModule):
         Scores a single LEAS item using a given wordlist.
     """
     type = "per item"
-    # id = "highestN-unique"
+    # id = "highestN"
 
-    def __init__(self, N: int) -> None:
+    def __init__(self, N) -> None:
         '''
         Initialized the highestN-unique scoring module
 
@@ -37,12 +38,12 @@ class highestN_unique(ScoringModule):
         '''
         super().__init__()
         self.N = N
-        self.id = "highest{}-unique".format(N)
+        self.id = "highest{}".format(N)
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
         '''
-        Scores a single LEAS item using the highestN-unique Scoring protocol.
+        Scores a single LEAS item using the highestN Scoring protocol.
 
                 Parameters:
                         item (Item): The LEAS item to be scored
@@ -54,9 +55,21 @@ class highestN_unique(ScoringModule):
         sentence = item.self_sentence + ' ' + item.other_sentence
         frequency, matching_words, scores = self.match_words(sentence, wordlist)
 
-        p = scores.argsort()
+        p = (-1*scores).argsort()
         scores = scores[p]
+        frequency = frequency[p]
 
-        if self.N > len(scores):
-            return sum(scores)
-        return sum(scores[-1*self.N:])
+        total = 0
+        i = 0
+        left = self.N
+        while i < frequency.size and left > 0:
+            if frequency[i] < left:
+                total += frequency[i]*scores[i]
+                left -= frequency[i]
+            else:
+                total += left*scores[i]
+                left = 0
+            
+            i += 1
+            
+        return total

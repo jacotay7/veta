@@ -1,6 +1,5 @@
 import numpy as np
-
-from wordlist import Wordlist
+from veta.wordlist import Wordlist
 
 class ScoringModule:
     """

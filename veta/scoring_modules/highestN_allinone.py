@@ -1,6 +1,6 @@
-from scoring_modules.scoring_module import *
-from scoring_modules.highestN import highestN
-from item import Item
+from veta.scoring_modules.scoring_module import *
+from veta.scoring_modules.highestN import highestN
+from veta.item import Item
 
 class highestN_allinone(ScoringModule):
     """

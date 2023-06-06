@@ -1,14 +1,11 @@
-from item import Item
-from wordlist import Wordlist
-from scoring_modules.scoring_module import *
+from veta.scoring_modules.scoring_module import *
+from veta.item import Item
 
-class _334(ScoringModule):
+class allsum_unique(ScoringModule):
     """
-    A class implementing the 334 scoring technique. Child of the ScoringModule class.
-    The 334 scoring protocol gives each item a score between 0 and 4. The score corresponds to
-    the highest scored word from the LEAS wordlist that is present in the sentence. Additionally, 
-    if there are more than one word with an LEAS score of 3 in the sentence, then the sentence is 
-    awarded a score of 4.
+    A class implementing the allsum-unique scoring technique. Child of the ScoringModule class.
+    The allsum-unique scoring protocol sums all of the scores for the unique Wordlist words that
+    are found in the LEAS item.
 
     ...
 
@@ -25,7 +22,7 @@ class _334(ScoringModule):
         Scores a single LEAS item using a given wordlist.
     """
     type = "per item"
-    id = "334"
+    id = "allsum-unique"
 
     def __init__(self) -> None:
         super().__init__()
@@ -33,7 +30,7 @@ class _334(ScoringModule):
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
         '''
-        Scores a single LEAS item using the 334 Scoring protocol.
+        Scores a single LEAS item using the allsum-unique Scoring protocol.
 
                 Parameters:
                         item (Item): The LEAS item to be scored
@@ -46,9 +43,4 @@ class _334(ScoringModule):
         sentence = item.self_sentence + ' ' + item.other_sentence
         frequency, matching_words, scores = self.match_words(sentence, wordlist)
 
-        if len(scores) == 0:
-            return 0
-        elif np.count_nonzero(scores == 3) > 1:
-            return 4
-        else:
-            return max(scores)
+        return sum(scores)
