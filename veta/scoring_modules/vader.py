@@ -1,4 +1,4 @@
-from scoring_modules.scoring_module import *
+from veta.scoring_modules.scoring_module import *
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 class vader(ScoringModule):

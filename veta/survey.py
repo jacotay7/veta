@@ -1,8 +1,8 @@
 import openpyxl
 
-from item import Item
-from respondent import Respondent
-from wordlist import Wordlist
+from veta.item import Item
+from veta.respondent import Respondent
+from veta.wordlist import Wordlist
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

@@ -1,5 +1,5 @@
-from item import *
-from wordlist import Wordlist
+from veta.item import Item
+from veta.wordlist import Wordlist
 import numpy as np
 
 total_respondents = 0

@@ -1,13 +1,12 @@
-from scoring_modules.scoring_module import *
-from item import Item
+from veta.scoring_modules.scoring_module import *
+from veta.scoring_modules._3345 import _3345
+from veta.item import Item
 
-class allsum(ScoringModule):
+class exp(ScoringModule):
     """
-    A class implementing the allsum scoring technique. Child of the ScoringModule class.
-    The allsum scoring protocol sums all of the scores for the Wordlist words that
-    are found in the LEAS item. If a word is repeated, the score is multiplied by the number 
-    of times the word occurs in the LEAS item.
-
+    A class implementing the exponential scoring technique. Child of the ScoringModule class.
+    The exponential scoring protocol returns the exp(b*3345(x)) where exp is the exponential 
+    function, b is a free parameter, and 3345(x) is the 3345 scoring module applied to an item x.
     ...
 
     Attributes
@@ -23,10 +22,20 @@ class allsum(ScoringModule):
         Scores a single LEAS item using a given wordlist.
     """
     type = "per item"
-    id = "allsum"
+    id = "exp"
 
-    def __init__(self) -> None:
+    def __init__(self, b) -> None:
+        '''
+        Initialized the exp scoring module
+
+                Parameters:
+                        b (float): the exponential scaling parameter to use for scoring.
+                Returns:
+
+                        
+        '''
         super().__init__()
+        self.b = b
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
@@ -39,9 +48,5 @@ class allsum(ScoringModule):
                 Returns:
                         score (int): The score for the item 
                         
-
         '''
-        sentence = item.self_sentence + ' ' + item.other_sentence
-        frequency, matching_words, scores = self.match_words(sentence, wordlist)
-
-        return sum(scores*frequency)
+        return np.exp(self.b*_3345().execute(item, wordlist))-1

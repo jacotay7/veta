@@ -1,6 +1,6 @@
-from scoring_modules.scoring_module import *
-from scoring_modules._3345 import _3345
-from item import Item
+from veta.scoring_modules.scoring_module import *
+from veta.scoring_modules._3345 import _3345
+from veta.item import Item
 
 class powerlaw(ScoringModule):
     """

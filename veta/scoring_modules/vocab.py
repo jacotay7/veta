@@ -1,5 +1,5 @@
-from scoring_modules.scoring_module import *
-from item import Item
+from veta.scoring_modules.scoring_module import *
+from veta.item import Item
 
 class vocab(ScoringModule):
     """

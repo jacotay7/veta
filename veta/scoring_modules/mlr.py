@@ -1,6 +1,6 @@
-from item import Item
-from wordlist import Wordlist
-from scoring_modules.scoring_module import *
+from veta.item import Item
+from veta.wordlist import Wordlist
+from veta.scoring_modules.scoring_module import *
 
 class mlr(ScoringModule):
     """
