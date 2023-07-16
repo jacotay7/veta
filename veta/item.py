@@ -21,7 +21,7 @@ class Item:
         A dictionary containing the scores or additional information assigned to the item. 
         The keys are the scoring module ids, the values are the corresponding scores.
     wordlist: Wordlist
-        The wordlist objetc used to produce the associated scores.
+        The wordlist object used to produce the associated scores.
     Methods
     -------
     add_additional_info(id, info)
