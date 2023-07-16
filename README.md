@@ -12,3 +12,8 @@ Clone the repository, navigate to the veta folder on your computer (the folder s
 ```
 pip install .
 ```
+
+# Vader
+
+veta implements a scoring module that utilizes the python package for the vader sentiment analysis tool: https://github.com/cjhutto/vaderSentiment/tree/master.
+This tool does support non-English text, but it will translate the text using the using **MY MEMORY NET http://mymemory.translated.net API which requires an active internet connection**. Users analyzing sensitive text should be aware of this before using the vader scoring module on non-English text.
