@@ -27,6 +27,8 @@ class allsum_unique(ScoringModule):
     def __init__(self, only_high_scores=False) -> None:
         super().__init__()
         self.only_high_scores = only_high_scores
+        if self.only_high_scores:
+            self.id += "-onlyhigh"
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
