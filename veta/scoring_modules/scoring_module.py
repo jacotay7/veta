@@ -47,7 +47,7 @@ class ScoringModule:
 
         return False
 
-    def match_words(self, sentence: str, wordlist: Wordlist):
+    def match_words(self, sentence: str, wordlist: Wordlist, sublevels = False):
         '''
         Finds which words from the wordlist are present in the sentence along with their frequency and corresponding scores.
         This function is used by most scoring modules to score LEAS items.
@@ -64,6 +64,9 @@ class ScoringModule:
         '''
         wordlist_words = wordlist.words
         wordlist_scores = wordlist.scores
+        if sublevels:
+            wordlist_subscores = wordlist.subclasses
+            subscores = []
 
         scores = []
         matching_words = []
@@ -74,11 +77,16 @@ class ScoringModule:
             word_lower = word_original.lower()
             if word_lower in sentence:
                 if self.is_full_word(sentence, word_lower):
-                    word_score = wordlist_scores[np.where(wordlist_words == word_original)][0]
+                    index = np.where(wordlist_words == word_original)
+                    word_score = wordlist_scores[index][0]
                     frequency.append(sentence.count(word_lower))
                     matching_words.append(word_original)
                     scores.append(word_score)
+                    if sublevels:
+                        subscores.append(wordlist_subscores[index][0])
 
+        if sublevels:
+            return np.array(frequency), np.array(matching_words), np.array(scores), np.array(subscores)
         return np.array(frequency), np.array(matching_words), np.array(scores)
 
     def __init__(self) -> None:

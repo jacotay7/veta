@@ -114,7 +114,7 @@ class Survey:
 
     def from_file(self, filename, layout='vertical'):
 
-        data = np.array(pd.read_excel(filename, header = None))
+        data = np.array(pd.read_excel(filename, header = None, engine='openpyxl'))
 
         if str(layout).lower() == "vertical":
             self.from_vertical_layout(data)
