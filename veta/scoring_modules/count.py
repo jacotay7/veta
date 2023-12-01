@@ -5,7 +5,7 @@ class count(ScoringModule):
     """
     A class implementing the count scoring technique. Child of the ScoringModule class.
     The count scoring protocol counts how many times a particular level is found in an 
-    in an LEAS item. 
+    in an LEAS item. This method ignores repeated mentioning of the same word. 
 
     ...
 
@@ -66,7 +66,10 @@ class count(ScoringModule):
 
         #If the user has not specified the level they are interested in, do them all
         if self.level is None:
-            return sum(frequency)
+            if self.binary:
+                return len(matching_words) > 1
+            else:
+                return len(matching_words)
         #Otherwise
         else:
             #If they have specified a subscore:
@@ -84,9 +87,9 @@ class count(ScoringModule):
                 #If they have specified a subscore:
                 if not(self.sublevel is None):
                     #Count all of the occurrences which have that level and sub level
-                    return sum(frequency[(scores == self.level)&(subscores == self.sublevel)])
+                    return len(matching_words[(scores == self.level)&(subscores == self.sublevel)])
                 else:
-                    return sum(frequency[scores == self.level])
+                    return len(matching_words[scores == self.level])
             else:
                 return 0
         
