@@ -35,6 +35,10 @@ class Wordlist:
         wordlist = self.get_wordlist_from_file(filename)
         self.words = wordlist[:,0]
         self.scores = wordlist[:,1]
+        if wordlist.shape[1] > 2:
+            self.subclasses = wordlist[:,2]
+        else:
+            self.subclasses = np.zeros_like(self.scores)
 
         return
 
@@ -48,7 +52,7 @@ class Wordlist:
                 Returns:
                         wordlist (numpy.array): the contents of the wordlist file given as as numpy array
         '''
-        return np.array(pd.read_excel(filename))
+        return np.array(pd.read_excel(filename, engine='openpyxl'))
 
     def __str__(self):
 

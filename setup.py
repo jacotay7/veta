@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='veta',
-    version='1.0.0',    
+    version='1.0.1',    
     description='A text-based emotion assessment tool to electronically score LEAS (Levels of Emotional Awareness Scale) surveys.',
     url='https://github.com/jacotay7/veta',
     author='Jacob Taylor',
@@ -10,12 +10,18 @@ setup(
     license='MIT',
     packages=['veta',
               'veta.scoring_modules'],
+    # package_data={
+    #     'veta': ['scoring_modules/model.sav'],
+    # },
     install_requires=['pandas',
                       'numpy',
                       'matplotlib',
                       'spacy',
                       'vaderSentiment',
-                      'openpyxl',                     
+                      'openpyxl',
+                      'requests',
+                      'seaborn',
+                      'scikit-learn'                     
                       ],
 
     classifiers=[
@@ -25,7 +31,6 @@ setup(
         'Environment :: MacOS X',  
         'Operating System :: OS Independent',        
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',

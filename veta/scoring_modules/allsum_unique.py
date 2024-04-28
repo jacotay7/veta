@@ -24,8 +24,11 @@ class allsum_unique(ScoringModule):
     type = "per item"
     id = "allsum-unique"
 
-    def __init__(self) -> None:
+    def __init__(self, only_high_scores=False) -> None:
         super().__init__()
+        self.only_high_scores = only_high_scores
+        if self.only_high_scores:
+            self.id += "-onlyhigh"
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
@@ -43,4 +46,7 @@ class allsum_unique(ScoringModule):
         sentence = item.self_sentence + ' ' + item.other_sentence
         frequency, matching_words, scores = self.match_words(sentence, wordlist)
 
-        return sum(scores)
+        if self.only_high_scores:
+            return sum(scores[scores>2])
+        else:
+            return sum(scores)

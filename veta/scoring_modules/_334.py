@@ -18,7 +18,9 @@ class _334(ScoringModule):
         A string indicating how wether the score applies to single item or an entire respondent. Equals either 'per item' or 'per respondent'
     id : str
         A unique string indentifying the scoring module
-
+    mode : str
+        A flag set by the user to score the self or other sentence components individually. 
+        Set mode = 'self' to only score the self component ot mode = 'other' to only score the other component. Default mode = 'both'.
     Methods
     -------
     execute(item: Item, wordlist: Wordlist) -> int
@@ -27,8 +29,13 @@ class _334(ScoringModule):
     type = "per item"
     id = "334"
 
-    def __init__(self) -> None:
+    def __init__(self, mode = "both") -> None:
         super().__init__()
+        self.mode = mode.lower()
+        if self.mode == "self":
+            self.id += '-self'
+        elif self.mode == "other":
+            self.id += '-other'
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
@@ -43,7 +50,13 @@ class _334(ScoringModule):
                         
 
         '''
-        sentence = item.self_sentence + ' ' + item.other_sentence
+        if self.mode == "self":
+            sentence = item.self_sentence
+        elif self.mode == "other":
+            sentence = item.other_sentence
+        else:
+            sentence = item.self_sentence + ' ' + item.other_sentence
+
         frequency, matching_words, scores = self.match_words(sentence, wordlist)
 
         if len(scores) == 0:

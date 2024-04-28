@@ -130,8 +130,14 @@ class Respondent:
         else:
             item = Item(*sentences)
             item.add_wordlist(self.wordlist)
+        
+        if 'index' not in item.scores.keys():
+            item.add_additional_info("index", len(self.items)+1)
+        
+        if not (self.wordlist is None):
+            item.add_wordlist(self.wordlist)
+            
         self.items.append(item)
-
         return item
 
     

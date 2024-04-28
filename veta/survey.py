@@ -6,6 +6,8 @@ from veta.wordlist import Wordlist
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 class Survey:
     """
@@ -77,10 +79,12 @@ class Survey:
                     self_sentence = ""
                 if isinstance(other_sentence,float) and np.isnan(other_sentence):
                     other_sentence = ""
+                
                 item = res.add_item(self_sentence,other_sentence)
                 for col in self.cols[3:3+self.num_item_cols ]:
                     #print(self.header[col], col,  data[i,col])
                     item.add_additional_info(self.header[col], data[i,col])
+                
         if len(res.items) == 0:
             self.respondents.remove(res)
         return
@@ -114,7 +118,7 @@ class Survey:
 
     def from_file(self, filename, layout='vertical'):
 
-        data = np.array(pd.read_excel(filename, header = None))
+        data = np.array(pd.read_excel(filename, header = None, engine='openpyxl'))
 
         if str(layout).lower() == "vertical":
             self.from_vertical_layout(data)
@@ -136,6 +140,8 @@ class Survey:
 
     def add_respondent(self, respondent):
         self.respondents.append(respondent)
+        if not (self.wordlist is None):
+            respondent.add_wordlist(self.wordlist)
         return
 
     def score(self,*modules):
@@ -244,4 +250,30 @@ class Survey:
 
 
         plt.show()
+
+    def plot_confusion(self, keys):
+
+        if len(keys) != 2 or keys[0] not in self.summary.keys() or keys[1] not in self.summary.keys():
+            raise ValueError("Must give two proper, per-item survey keys")
+
+        confusion = dict()
+        for _id in keys:
+            confusion[_id] = []
+        for r in self.respondents:
+            for item in r.items:
+                for _id in keys:
+                    confusion[_id].append(item.scores[_id])
+
+        # Calculate the confusion matrix
+        cm_svm_tf = confusion_matrix(confusion[keys[0]], confusion[keys[1]])
+
+        # Create a dataframe from the confusion matrix for better visualization
+        confusion_matrix_df_svm_tf = pd.DataFrame(cm_svm_tf)
+
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(confusion_matrix_df_svm_tf, annot=True, cmap='Blues', fmt='d')
+        plt.xlabel(keys[1])
+        plt.ylabel(keys[0])
+        plt.title(f'Confusion Matrix Between {keys[0]} & {keys[1]}')
+        plt.show() 
 
