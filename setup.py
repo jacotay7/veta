@@ -10,13 +10,18 @@ setup(
     license='MIT',
     packages=['veta',
               'veta.scoring_modules'],
+    # package_data={
+    #     'veta': ['scoring_modules/model.sav'],
+    # },
     install_requires=['pandas',
                       'numpy',
                       'matplotlib',
                       'spacy',
                       'vaderSentiment',
                       'openpyxl',
-                      'requests'                     
+                      'requests',
+                      'seaborn',
+                      'scikit-learn'                     
                       ],
 
     classifiers=[

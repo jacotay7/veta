@@ -1,5 +1,6 @@
 from veta.wordlist import Wordlist
 from veta.scoring_modules.scoring_module import ScoringModule
+import inspect
 
 class Item:
     """
@@ -93,7 +94,7 @@ class Item:
         '''
         sentence = str(sentence).lower()
         for c in sentence:
-            if c in "-,.?!;:/\n":
+            if c in "–,-,.?!;:/()$\n":
                 sentence = sentence.replace(c,' ')
         return sentence
 
@@ -106,17 +107,21 @@ class Item:
                 Returns:
 
         '''
-        if isinstance(self.wordlist, Wordlist):
+        if len(inspect.signature(scoring_module.execute).parameters) < 2:
+            scres = scoring_module.execute(self)
+
+        elif isinstance(self.wordlist, Wordlist):
 
             scres = scoring_module.execute(self, self.wordlist)
-            if isinstance(scres,tuple):
-                for i in range(len(scres)):
-                    self.scores[scoring_module.id+str(i+1)] = scres[i]
-            else:
-                self.scores[scoring_module.id] = scres
-        
         else:
             raise Exception("Scoring Error: Item does not have a wordlist")
+        
+        if isinstance(scres,tuple):
+            for i in range(len(scres)):
+                self.scores[scoring_module.id+str(i+1)] = scres[i]
+        else:
+            self.scores[scoring_module.id] = scres
+        
         
         return
 
@@ -131,5 +136,6 @@ class Item:
         '''
         self.wordlist = wordlist
         return
+        
     
 
