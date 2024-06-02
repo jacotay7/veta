@@ -23,8 +23,8 @@ class vocab(ScoringModule):
     type = "per respondent"
     id = "vocab"
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, language='en') -> None:
+        super().__init__(language=language)
         return
 
     def execute(self, items: list, wordlist: Wordlist) -> int:

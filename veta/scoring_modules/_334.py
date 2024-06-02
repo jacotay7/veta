@@ -29,8 +29,8 @@ class _334(ScoringModule):
     type = "per item"
     id = "334"
 
-    def __init__(self, mode = "both") -> None:
-        super().__init__()
+    def __init__(self, mode = "both", language='en') -> None:
+        super().__init__(language=language)
         self.mode = mode.lower()
         if self.mode == "self":
             self.id += '-self'

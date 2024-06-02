@@ -19,11 +19,10 @@ class sentiment(ScoringModule):
 
     #language_codes = ["en", "fr", "de", "es", "it", "ru", "ja", "ar", "zh-CN", "zh-TW"]
 
-    def __init__(self, lang = 'en') -> None:
-        super().__init__()
-        self.lang = lang.lower()
+    def __init__(self, language = 'en') -> None:
+        super().__init__(language=language)
 
-        if self.lang == 'de':
+        if self.language == 'de':
             self.model = SentimentModel()
         else:
             self.analyzer = SentimentIntensityAnalyzer()
@@ -34,16 +33,16 @@ class sentiment(ScoringModule):
         
         sentence = item.self_sentence + ' ' + item.other_sentence
 
-        if self.lang == 'de':
+        if self.language == 'de':
             classes, probabilities = self.model.predict_sentiment([sentence], output_probabilities = True) 
             ratings = [round(i[1],2) for i in probabilities[0]]
             ratings.append(round(ratings[0]-ratings[1],2))
             return tuple(ratings)
 
         # Translation using MY MEMORY
-        # if self.lang != 'en':
+        # if self.language != 'en':
         #     # using   MY MEMORY NET   http://mymemory.translated.net
-        #     api_url = "http://mymemory.translated.net/api/get?q={}&langpair={}|{}".format(sentence, self.lang,
+        #     api_url = "http://mymemory.translated.net/api/get?q={}&langpair={}|{}".format(sentence, self.language,
         #                                                                                     'en')
         #     hdrs = {
         #         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',

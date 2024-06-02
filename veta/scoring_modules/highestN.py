@@ -26,7 +26,7 @@ class highestN(ScoringModule):
     type = "per item"
     # id = "highestN"
 
-    def __init__(self, N) -> None:
+    def __init__(self, N, language='en') -> None:
         '''
         Initialized the highestN-unique scoring module
 
@@ -36,7 +36,7 @@ class highestN(ScoringModule):
 
                         
         '''
-        super().__init__()
+        super().__init__(language=language)
         self.N = N
         self.id = "highest{}".format(N)
         return

@@ -24,8 +24,8 @@ class highestN_allinone(ScoringModule):
     type = "per respondent"
     
 
-    def __init__(self, N) -> None:
-        super().__init__()
+    def __init__(self, N, language='en') -> None:
+        super().__init__(language=language)
         self.N = N
         self.id = "highest{}-allinone".format(N)
         return

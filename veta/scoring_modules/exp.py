@@ -24,7 +24,7 @@ class exp(ScoringModule):
     type = "per item"
     id = "exp"
 
-    def __init__(self, b) -> None:
+    def __init__(self, b, language='en') -> None:
         '''
         Initialized the exp scoring module
 
@@ -34,7 +34,7 @@ class exp(ScoringModule):
 
                         
         '''
-        super().__init__()
+        super().__init__(language=language)
         self.b = b
         return
 

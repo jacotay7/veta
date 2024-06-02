@@ -28,10 +28,10 @@ class mlr(ScoringModule):
     type = "per item"
     id = "mlr"
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, language='en') -> None:
+        super().__init__(language=language)
         return
-
+    
     def execute(self, item: Item, wordlist: Wordlist) -> int:
         '''
         Scores a single LEAS item using the mlr Scoring protocol.

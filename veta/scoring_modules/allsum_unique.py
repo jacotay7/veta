@@ -24,8 +24,8 @@ class allsum_unique(ScoringModule):
     type = "per item"
     id = "allsum-unique"
 
-    def __init__(self, only_high_scores=False) -> None:
-        super().__init__()
+    def __init__(self, only_high_scores=False, language='en') -> None:
+        super().__init__(language=language)
         self.only_high_scores = only_high_scores
         if self.only_high_scores:
             self.id += "-onlyhigh"

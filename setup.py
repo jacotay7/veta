@@ -21,7 +21,8 @@ setup(
                       'openpyxl',
                       'requests',
                       'seaborn',
-                      'scikit-learn'                     
+                      'scikit-learn',
+                      'datetime'                     
                       ],
 
     classifiers=[

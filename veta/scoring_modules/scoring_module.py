@@ -39,13 +39,24 @@ class ScoringModule:
                         (bool): True if the word is in the sentence with spaces on either side. False otherwise.
 
         '''
+
         sentence_tmp = ' ' + sentence + ' '
+        
         index = sentence_tmp.index(word)
 
-        if sentence_tmp[index-1] == ' ' and sentence_tmp[index+len(word)] == ' ':
-            return True
+        previous_char = sentence_tmp[index-1]
+        next_char = sentence_tmp[index+len(word)]
 
-        return False
+        acceptable_prev_chars = ' '
+        acceptable_next_chars = ' '
+        #Hebrew specific rulings
+        if self.language == 'he':
+            acceptable_prev_chars += 'וש'
+        elif self.language == 'ar':
+            acceptable_prev_chars += '،ءأؤإئابةتثجحخدذرزسشصضطظعغفقكلمنهوىي'
+        condition = previous_char in acceptable_prev_chars and  next_char in acceptable_next_chars
+        return condition
+
 
     def match_words(self, sentence: str, wordlist: Wordlist, sublevels = False):
         '''
@@ -124,8 +135,9 @@ class ScoringModule:
             return frequency, matching_words, scores, subscores
         return frequency, matching_words, scores
 
-    def __init__(self) -> None:
+    def __init__(self, language='en') -> None:
 
+        self.language = language
         return
 
     def execute():

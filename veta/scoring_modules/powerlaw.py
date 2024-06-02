@@ -25,7 +25,7 @@ class powerlaw(ScoringModule):
     type = "per item"
     id = "powerlaw"
 
-    def __init__(self, gamma) -> None:
+    def __init__(self, gamma, language='en') -> None:
         '''
         Initialized the exp scoring module
 
@@ -35,7 +35,7 @@ class powerlaw(ScoringModule):
 
                         
         '''
-        super().__init__()
+        super().__init__(language=language)
         self.gamma = gamma
         return
 

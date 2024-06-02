@@ -24,8 +24,8 @@ class count(ScoringModule):
     type = "per item"
     id = "count"
 
-    def __init__(self, mode = 'both', level = None, sublevel = None, binary=False) -> None:
-        super().__init__()
+    def __init__(self, mode = 'both', level = None, sublevel = None, binary=False, language='en') -> None:
+        super().__init__(language=language)
         self.level = level
         self.sublevel = sublevel
         self.binary = binary

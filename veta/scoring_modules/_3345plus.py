@@ -26,8 +26,8 @@ class _3345plus(ScoringModule):
     type = "per item"
     id = "3345plus"
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, language='en') -> None:
+        super().__init__(language=language)
         return
 
     def execute(self, item: Item, wordlist: Wordlist) -> int:
