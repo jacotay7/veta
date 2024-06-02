@@ -44,6 +44,17 @@ class Wordlist:
         else:
             self.subclasses = np.zeros_like(self.scores)
 
+        w, s, sb = [], [], []
+
+        for i in range(len(self.words)):
+            if isinstance(self.words[i], str):
+                w.append(self.words[i].lower())
+                s.append(self.scores[i])
+                sb.append(self.subclasses[i])
+        self.words = np.array(w)
+        self.scores = np.array(s)
+        self.subclasses = np.array(sb)
+
         return
 
     def get_wordlist_from_file(self, filename: str) -> np.array:
