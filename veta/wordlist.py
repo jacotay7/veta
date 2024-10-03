@@ -79,11 +79,76 @@ class Wordlist:
 
         return ret
     
+    def addWord(self, word, score, subclass=0.0):
+        assert(isinstance(word, str) and isinstance(score, float), isinstance(subclass, float))
+        self.words = np.append(self.words, word)
+        self.scores = np.append(self.scores, score)
+        self.subclasses = np.append(self.subclasses, subclass)
+        return
+
+    def addWords(self, words, scores, subclasses=None):
+
+        #Check data types
+        if isinstance(words, list):
+            words = np.array(words)
+        if isinstance(scores, list):
+            scores = np.array(scores)
+        if isinstance(subclasses, list):
+            subclasses = np.array(subclasses)
+
+        assert(isinstance(words, np.ndarray))
+        assert(isinstance(scores, np.ndarray))
+        if subclasses is not None:
+            assert(isinstance(subclasses, np.ndarray))
+        else:
+            subclasses = np.zeros_like(scores)
+        for i in range(len(words)):
+            self.addWord(words[i], scores[i], subclasses[i])
+        return
+
+    def sortWordlist(self):
+        # Get the indices that would sort the string array
+        sorted_indices = np.argsort(self.words)
+
+        # Apply the indices to all arrays
+        self.words = self.words[sorted_indices]
+        self.scores = self.scores[sorted_indices]
+        self.subclasses = self.subclasses[sorted_indices]
+
+        return 
+
+    def removeWord(self, word):
+        # Find the indices where arr_strings equals str_to_remove
+        indices_to_remove = np.where(self.words == word)[0]
+        
+        if indices_to_remove.size == 0:
+            print(f"'{word}' not found in arr_strings.")
+            return
+        # Remove the indices from arr_strings
+        self.words = np.delete(self.words, indices_to_remove)
+        self.scores = np.delete(self.scores, indices_to_remove)
+        self.subclasses = np.delete(self.subclasses, indices_to_remove)
+
+        return
+    
+    def removeWords(self, words):
+
+        #Check data types
+        if isinstance(words, list):
+            words = np.array(words)
+
+        assert(isinstance(words, np.ndarray))
+
+        for i in range(len(words)):
+            self.removeWord(words[i])
+        return
+    
     def save(self, filename, format='xlsx'):
+        self.sortWordlist()
         format = format.lower()
         if format == 'xlsx' or format == 'excel':
             # Convert the arrays to a pandas DataFrame
-            df = pd.DataFrame({'Words': self.words, 'Scores': self.scores})
+            df = pd.DataFrame({'Words': self.words, 'Scores': self.scores, 'Sublevel': self.subclasses})
             # Save the DataFrame to an Excel file
             df.to_excel(filename, index=False)
         elif format == 'txt':

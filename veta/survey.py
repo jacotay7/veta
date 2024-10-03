@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import os 
 
 class Survey:
     """
@@ -96,15 +97,18 @@ class Survey:
         self.data = data
         id_col, self_col, other_col = self.cols[:3]
 
+        #Loop through rows of the data
         for i in range(data.shape[0]):
+            #Extract the userID
             userid = data[i,id_col]
             if isinstance(userid,float) and np.isnan(userid):
                 res = Respondent()
             else:
                 res = Respondent(userid=str(userid))
             self.add_respondent(res)
-
-            for j in range(1,data.shape[1],2):
+            #loop through data columns, starting with self_col
+            #Assumes LEAS data is continuous
+            for j in range(self_col, data.shape[1],2):
 
                 self_sentence = data[i,j]
                 other_sentence = data[i,j+1]
@@ -113,12 +117,22 @@ class Survey:
                 if isinstance(other_sentence,float) and np.isnan(other_sentence):
                     other_sentence = ""
                 res.add_item(self_sentence,other_sentence)
-
+            for col in self.cols[3+self.num_item_cols:]:
+                res.add_additional_info(self.header[col], data[i,col])
         return        
 
     def from_file(self, filename, layout='vertical'):
 
-        data = np.array(pd.read_excel(filename, header = None, engine='openpyxl'))
+        # Get the file extension
+        file_extension = os.path.splitext(filename)[1]
+        
+        # Check the file extension and read the file accordingly
+        if file_extension == '.csv':
+            data = np.array(pd.read_csv(filename, header=None))
+        elif file_extension in ['.xls', '.xlsx']:
+            data = np.array(pd.read_excel(filename, header=None, engine='openpyxl'))
+        else:
+            raise ValueError(f"Unsupported file extension: {file_extension}")
 
         if str(layout).lower() == "vertical":
             self.from_vertical_layout(data)
@@ -129,7 +143,7 @@ class Survey:
 
         return
     
-    def configure_columns(self, id_col, self_col, other_col, per_item_cols, per_res_cols):
+    def configure_columns(self, id_col, self_col, other_col, per_item_cols=[], per_res_cols=[]):
         self.cols = [id_col,self_col,other_col]
         for col in per_item_cols:
             self.cols.append(col)
@@ -177,7 +191,7 @@ class Survey:
 
         #Set the header row
         for j in range(num_cols):
-            ws1.cell(1, column=j+1).value = self.header[j]
+            ws1.cell(1, column=j+1).value = self.header[self.cols[j]]
 
         #Get the module names that have been run and sort them
         respondent_modules = list(self.respondents[0].totals.keys())
@@ -195,11 +209,11 @@ class Survey:
         for res in self.respondents:
             for item in res.items:
                 if isinstance(res.userid,str):
-                    ws1.cell(row=r, column=self.cols[0]+1).value = res.userid
+                    ws1.cell(row=r, column=1).value = res.userid
                 else:
-                    ws1.cell(row=r, column=self.cols[0]+1).value = res.userid
-                ws1.cell(row=r, column=self.cols[1]+1).value = item.self_sentence
-                ws1.cell(row=r, column=self.cols[2]+1).value = item.other_sentence
+                    ws1.cell(row=r, column=1).value = res.userid
+                ws1.cell(row=r, column=2).value = item.self_sentence
+                ws1.cell(row=r, column=3).value = item.other_sentence
                 r += 1
             r +=1
 
@@ -212,25 +226,49 @@ class Survey:
                     ws1.cell(row=current_row+1, column=j+num_cols+1).value = full_data[i,j]
                 current_row += 1
 
-        #Save the file
-        wb.save(filename = filename)
+        # Get the file extension
+        file_extension = os.path.splitext(filename)[1]
+        if file_extension == '.csv':
+            # Convert the first sheet of the workbook to a pandas DataFrame
+            ws = wb.active  # or specify the sheet by wb[sheetname]
+            data = ws.values
+            # Create a DataFrame from the sheet data
+            df = pd.DataFrame(data)
+            # Save the DataFrame as a CSV file
+            csv_filename = filename if filename.endswith('.csv') else filename + '.csv'
+            df.to_csv(csv_filename, index=False, header=False)
+        elif file_extension in ['.xls', '.xlsx']:
+            # Save as the original workbook format (Excel)
+            wb.save(filename=filename)
+        else:
+            raise ValueError(f"Unsupported file extension: {file_extension}")
+
 
     
     def plot_matrix(self, ids):
 
-        if ids == -1:
+        if isinstance(ids, int) and ids == -1:
             ids = list(self.summary.keys())
 
-        fig, ax = plt.subplots(nrows=len(ids), ncols=len(ids), figsize = (20,20))
+        if isinstance(ids, list):
+            assert len(ids) >= 2
+            for i in range(len(ids)):
+                assert isinstance(ids[i], str)
+
+        height, width = len(ids)-1, len(ids)-1
+
+        fig, ax = plt.subplots(nrows=height, ncols=width, figsize = (5*height,5*width))
+        if height == 1 and width == 1:
+            ax = [[ax]]
         fig.tight_layout()
-        for i in range(len(ids)):
-            row = ax[i,:]
-            for j in range(len(row)):
+        for i in range(height):
+            row = ax[i]
+            for j in range(width):
                 col = row[j]
                 if i <= j:
                     x = self.summary[ids[i]]
                     
-                    y = self.summary[ids[j]]
+                    y = self.summary[ids[j+1]]
                     y = y[~np.isnan(x)]
                     x = x[~np.isnan(x)]
                     x = x[~np.isnan(y)]
@@ -241,8 +279,8 @@ class Survey:
 
                     col.plot(x, y, '.', color = 'k', alpha = 0.5, label = r"$\rho = ${:.2f}".format(corr))
                     col.plot(x, z[0]*x + z[1], '-', color = 'r', alpha = 0.3)
-                    col.set_xlabel(ids[i],size = 10)
-                    col.set_ylabel(ids[j],size = 10)
+                    col.set_xlabel(ids[i],size = 16)
+                    col.set_ylabel(ids[j+1],size = 16)
                     col.grid()
                     col.legend(loc = 0)
                 else:
