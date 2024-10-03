@@ -108,7 +108,6 @@ class Respondent:
                 if total_name in module_names:
                     full_data[i,j] = item.scores[total_name]
         
-        
         for i in range(len(total_names)):
             total_name = total_names[i]
             # print(total_name, total_names)
