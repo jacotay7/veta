@@ -94,7 +94,7 @@ class Item:
         '''
         sentence = str(sentence).lower()
         for c in sentence:
-            if c in "–,-,.?!;:/()$\n":
+            if c in "_–,-,.?!;:/()$\n\r\t":
                 sentence = sentence.replace(c,' ')
         return sentence
 
