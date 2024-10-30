@@ -23,8 +23,13 @@ class vocab(ScoringModule):
     type = "per respondent"
     id = "vocab"
 
-    def __init__(self, language='en') -> None:
+    def __init__(self,  mode = "both", language='en') -> None:
         super().__init__(language=language)
+        self.mode = mode.lower()
+        if self.mode == "self":
+            self.id += '-self'
+        elif self.mode == "other":
+            self.id += '-other'
         return
 
     def execute(self, items: list, wordlist: Wordlist) -> int:
@@ -40,7 +45,13 @@ class vocab(ScoringModule):
         '''
         total_sentence = ""
         for item in items:
-            total_sentence += " " + item.self_sentence + ' ' + item.other_sentence + ' '
+            if self.mode == "self":
+                sentence = item.self_sentence
+            elif self.mode == "other":
+                sentence = item.other_sentence
+            else:
+                sentence = item.self_sentence + ' ' + item.other_sentence
+            total_sentence += " " + sentence + ' '
         
         words = total_sentence.split(' ')
         words = [word for word in words if word != '']
