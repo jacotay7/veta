@@ -10,6 +10,7 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix
 import os 
 import json
+from scipy.stats import norm
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -180,7 +181,7 @@ class Survey:
         for respondent in self.respondents:
             respondent.score(*modules)
 
-    def compute_summary(self):
+    def compute_summary(self, percentiles=False):
 
         for respondent in self.respondents:
             for key in respondent.totals.keys():
@@ -192,6 +193,18 @@ class Survey:
         
         for key in self.summary.keys():
             self.summary[key] = np.array(self.summary[key], dtype=float)
+
+        if percentiles:
+            if "3345plus" in self.summary.keys():
+                # Convert each value to a percentile
+                self.summary['20-item-percentile']  = norm.cdf(self.summary["3345plus"], 
+                                       loc=70, 
+                                       scale=7) * 100
+                                # Convert each value to a percentile
+                self.summary['10-item-percentile']  = norm.cdf(self.summary["3345plus"], 
+                                       loc=35, 
+                                       scale=5) * 100
+
 
     def add_wordlist(self, wordlist: Wordlist):
         self.wordlist = wordlist
@@ -282,7 +295,7 @@ class Survey:
         fig, ax = plt.subplots(nrows=height, ncols=width, figsize = (5*height,5*width))
         if height == 1 and width == 1:
             ax = [[ax]]
-        fig.tight_layout()
+        
         for i in range(height):
             row = ax[i]
             for j in range(width):
@@ -308,7 +321,7 @@ class Survey:
                 else:
                     col.set_axis_off()
 
-
+        fig.tight_layout()
         plt.show()
 
     def plot_confusion(self, keys):
