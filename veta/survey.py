@@ -205,7 +205,9 @@ class Survey:
                                        loc=35, 
                                        scale=5) * 100
 
-
+                for idx, respondent in enumerate(self.respondents):
+                    respondent.totals["10-item-percentile"] = self.summary["10-item-percentile"][idx]
+                    respondent.totals["20-item-percentile"] = self.summary["20-item-percentile"][idx]
     def add_wordlist(self, wordlist: Wordlist):
         self.wordlist = wordlist
         for respondent in self.respondents:
