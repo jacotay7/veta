@@ -178,16 +178,19 @@ class Respondent:
                 total = module.execute(self.items, self.wordlist)
             #self.modules_ran.add(module.id)
                 self.totals[module.id] = total
+        self.compute_totals()
+
+        return
+
+    def compute_totals(self):
+        if len(self.items) < 1:
+            return
         for ids in self.items[0].scores.keys():
             total = 0
             for item in self.items:
                 total += item.scores[ids]
             if total != 0 or ids not in self.totals.keys():
                 self.totals[ids] = total
-
-        return
-
-
 
     def add_wordlist(self, wordlist: Wordlist) -> None:
         '''
