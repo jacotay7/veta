@@ -183,6 +183,27 @@ class Survey:
 
     def compute_summary(self, percentiles=False):
 
+        #Sum all of the respondents scores
+        for respondent in self.respondents:
+            respondent.compute_totals()
+
+            #If we are going to report percentiles
+            if percentiles:
+                #Look for the relevant scoring method
+                if "3345plus" in respondent.totals.keys():
+                    # Convert each value to a percentile and add to totals
+                    perc20 = norm.cdf(respondent.totals["3345plus"], 
+                                        loc=70, 
+                                        scale=7) * 100
+                    perc10 = norm.cdf(respondent.totals["3345plus"], 
+                                        loc=35, 
+                                        scale=5) * 100
+                    perc10 = np.round(perc10,2)
+                    perc20 = np.round(perc20,2)
+                    respondent.add_additional_info('20-item-percentile',perc20)
+                    respondent.add_additional_info('20-item-percentile',perc10)
+
+        #Add all of the respondents totals to the summary
         for respondent in self.respondents:
             for key in respondent.totals.keys():
                 self.summary[key] = []
@@ -191,23 +212,12 @@ class Survey:
             for key in respondent.totals.keys():
                 self.summary[key].append(respondent.totals[key])
         
+        #Convert to numpy arrays
         for key in self.summary.keys():
             self.summary[key] = np.array(self.summary[key], dtype=float)
 
-        if percentiles:
-            if "3345plus" in self.summary.keys():
-                # Convert each value to a percentile
-                self.summary['20-item-percentile']  = norm.cdf(self.summary["3345plus"], 
-                                       loc=70, 
-                                       scale=7) * 100
-                                # Convert each value to a percentile
-                self.summary['10-item-percentile']  = norm.cdf(self.summary["3345plus"], 
-                                       loc=35, 
-                                       scale=5) * 100
+        return
 
-                for idx, respondent in enumerate(self.respondents):
-                    respondent.totals["10-item-percentile"] = self.summary["10-item-percentile"][idx]
-                    respondent.totals["20-item-percentile"] = self.summary["20-item-percentile"][idx]
     def add_wordlist(self, wordlist: Wordlist):
         self.wordlist = wordlist
         for respondent in self.respondents:
