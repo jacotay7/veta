@@ -46,6 +46,7 @@ class Item:
 
         '''
         self.raw_input = self_sentence +". " + other_sentence
+        self.full_sentence = self.clean_sentence(self.raw_input)
         self.self_sentence = self.clean_sentence(self_sentence)
         self.other_sentence = self.clean_sentence(other_sentence)
         self.scores = {}
@@ -94,8 +95,9 @@ class Item:
         '''
         sentence = str(sentence).lower()
         for c in sentence:
-            if c in "–,-,.?!;:/()$\n":
+            if c in "_–,-,.?!;:/()$\n\r\t":
                 sentence = sentence.replace(c,' ')
+        sentence = sentence.replace("  ",' ').strip()
         return sentence
 
     def score(self, scoring_module: ScoringModule) -> None:

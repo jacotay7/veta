@@ -9,6 +9,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 import os 
+import json
+from scipy.stats import norm
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        elif isinstance(obj, (np.ndarray,)):
+            return obj.tolist()
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        else:
+            return super(NumpyEncoder, self).default(obj)
 
 class Survey:
     """
@@ -131,6 +146,9 @@ class Survey:
             data = np.array(pd.read_csv(filename, header=None))
         elif file_extension in ['.xls', '.xlsx']:
             data = np.array(pd.read_excel(filename, header=None, engine='openpyxl'))
+        elif file_extension in ['.json']:
+            self.from_json(filename)
+            return
         else:
             raise ValueError(f"Unsupported file extension: {file_extension}")
 
@@ -163,8 +181,29 @@ class Survey:
         for respondent in self.respondents:
             respondent.score(*modules)
 
-    def compute_summary(self):
+    def compute_summary(self, percentiles=False):
 
+        #Sum all of the respondents scores
+        for respondent in self.respondents:
+            respondent.compute_totals()
+
+            #If we are going to report percentiles
+            if percentiles:
+                #Look for the relevant scoring method
+                if "3345plus" in respondent.totals.keys():
+                    # Convert each value to a percentile and add to totals
+                    perc20 = norm.cdf(respondent.totals["3345plus"], 
+                                        loc=70, 
+                                        scale=7) * 100
+                    perc10 = norm.cdf(respondent.totals["3345plus"], 
+                                        loc=35, 
+                                        scale=5) * 100
+                    perc10 = np.round(perc10,2)
+                    perc20 = np.round(perc20,2)
+                    respondent.add_additional_info('20-item-percentile',perc20)
+                    respondent.add_additional_info('20-item-percentile',perc10)
+
+        #Add all of the respondents totals to the summary
         for respondent in self.respondents:
             for key in respondent.totals.keys():
                 self.summary[key] = []
@@ -173,8 +212,11 @@ class Survey:
             for key in respondent.totals.keys():
                 self.summary[key].append(respondent.totals[key])
         
+        #Convert to numpy arrays
         for key in self.summary.keys():
             self.summary[key] = np.array(self.summary[key], dtype=float)
+
+        return
 
     def add_wordlist(self, wordlist: Wordlist):
         self.wordlist = wordlist
@@ -182,6 +224,13 @@ class Survey:
             respondent.add_wordlist(wordlist)
 
     def save(self, filename):
+        # Get the file extension
+        file_extension = os.path.splitext(filename)[1]
+
+        if file_extension in ['.json']:
+            with open(filename, 'w') as f:
+                json.dump(self.to_json(), f, indent=2, cls=NumpyEncoder)
+            return
 
         #Open a new excel workbook
         wb = openpyxl.Workbook()
@@ -226,8 +275,6 @@ class Survey:
                     ws1.cell(row=current_row+1, column=j+num_cols+1).value = full_data[i,j]
                 current_row += 1
 
-        # Get the file extension
-        file_extension = os.path.splitext(filename)[1]
         if file_extension == '.csv':
             # Convert the first sheet of the workbook to a pandas DataFrame
             ws = wb.active  # or specify the sheet by wb[sheetname]
@@ -260,7 +307,7 @@ class Survey:
         fig, ax = plt.subplots(nrows=height, ncols=width, figsize = (5*height,5*width))
         if height == 1 and width == 1:
             ax = [[ax]]
-        fig.tight_layout()
+        
         for i in range(height):
             row = ax[i]
             for j in range(width):
@@ -286,7 +333,7 @@ class Survey:
                 else:
                     col.set_axis_off()
 
-
+        fig.tight_layout()
         plt.show()
 
     def plot_confusion(self, keys):
@@ -315,3 +362,50 @@ class Survey:
         plt.title(f'Confusion Matrix Between {keys[0]} & {keys[1]}')
         plt.show() 
 
+    def to_json(self):
+        data = []
+        for respondent in self.respondents:
+            respondent_data = {
+                'userid': respondent.userid,
+                'totals': respondent.totals,
+                'items': []
+            }
+            for item in respondent.items:
+                item_data = {
+                    'self_sentence': item.self_sentence,
+                    'other_sentence': item.other_sentence,
+                    'scores': item.scores
+                }
+                respondent_data['items'].append(item_data)
+            data.append(respondent_data)
+        return data
+
+    def from_json(self, filename):
+
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Error loading JSON data: {e}")
+            return
+
+        self.respondents = []
+
+        for respondent_data in data:
+            respondent = Respondent()
+            respondent.userid = respondent_data.get('userid', '')
+            respondent.totals = respondent_data.get('totals', {})
+            respondent.items = []
+
+            for item_data in respondent_data.get('items', []):
+
+                item = Item(item_data.get('self_sentence', ''),
+                           item_data.get('other_sentence', ''))
+                item.scores = item_data.get('scores', {})
+
+                respondent.items.append(item)
+
+            self.respondents.append(respondent)
+
+        self.add_wordlist(self.wordlist)
+        return
