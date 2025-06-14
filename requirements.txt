@@ -1,0 +1,30 @@
+# Core dependencies (from setup.py)
+pandas>=2.0.0
+numpy>=1.20.0
+matplotlib>=3.5.0
+spacy>=3.4.0
+vaderSentiment>=3.3.0
+openpyxl>=3.0.0
+requests>=2.25.0
+seaborn>=0.11.0
+scikit-learn>=1.0.0
+scipy>=1.7.0
+
+# Testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.8.0
+pytest-xdist>=3.0.0  # For parallel test execution
+pytest-html>=3.1.0   # For HTML test reports
+pytest-benchmark>=4.0.0  # For performance testing
+
+# Development dependencies
+black>=22.0.0         # Code formatting
+flake8>=5.0.0         # Linting
+mypy>=1.0.0           # Type checking
+isort>=5.10.0         # Import sorting
+pre-commit>=2.20.0    # Git hooks
+
+# Documentation (optional)
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
