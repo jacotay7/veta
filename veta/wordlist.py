@@ -104,7 +104,7 @@ class Wordlist:
         return ret
     
     def addWord(self, word, score, subclass=0.0):
-        assert(isinstance(word, str) and isinstance(score, float), isinstance(subclass, float))
+        assert isinstance(word, str) and isinstance(score, float) and isinstance(subclass, float)
         self.words = np.append(self.words, word)
         self.scores = np.append(self.scores, score)
         self.subclasses = np.append(self.subclasses, subclass)

@@ -41,10 +41,17 @@ class ScoringModule:
                         (bool): True if the word is in the sentence with spaces on either side. False otherwise.
 
         '''
-
+        # Handle edge cases
+        if not sentence or not word:
+            raise ValueError("Both sentence and word must be non-empty strings")
+        
         sentence_tmp = ' ' + sentence + ' '
         
-        index = sentence_tmp.index(word)
+        try:
+            index = sentence_tmp.index(word)
+        except ValueError:
+            # Word not found in sentence
+            return False
 
         previous_char = sentence_tmp[index-1]
         next_char = sentence_tmp[index+len(word)]
@@ -219,8 +226,10 @@ class ScoringModule:
         self.language = language
         self.regex = None
         self.wordlist = None
-        self.acceptable_prev_chars = ''
-        self.acceptable_next_chars = ''
+        # Initialize with basic word boundary characters (space, punctuation)
+        self.acceptable_prev_chars = ' \t\n\r.,!?;:()[]{}"-'
+        self.acceptable_next_chars = ' \t\n\r.,!?;:()[]{}"-'
+        
         #Hebrew specific rulings
         if self.language == 'he':
             self.acceptable_prev_chars += "לושבהו"
@@ -239,6 +248,13 @@ class ScoringModule:
 
         # Sort the words by length in descending order to match longer phrases first
         words_sorted = sorted(wordlist.words, key=len, reverse=True)
+
+        # Handle empty wordlist case
+        if len(words_sorted) == 0:
+            # Create a regex that matches nothing
+            self.regex = re.compile(r'(?!.*)')
+            self.patterns = []
+            return
 
         # Prepare the special characters pattern
         acceptable_prev_chars_pattern = '[' + self.acceptable_prev_chars + ']?'
@@ -271,9 +287,11 @@ class ScoringModule:
         # Compile the regex pattern
         self.regex = re.compile(combined_pattern)
 
-    def execute():
-        
-        return
+    def execute(self):
+        """
+        Execute the scoring module. This method should be overridden by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement the execute method")
     
     def remove_full_words(self, sentence, word):
         """
