@@ -1,6 +1,10 @@
 from veta.item import Item
 from veta.wordlist import Wordlist
+from veta.logger import get_logger
 import numpy as np
+
+# Initialize logger for this module
+logger = get_logger('respondent')
 
 total_respondents = 0
 
@@ -39,13 +43,17 @@ class Respondent:
         
         global total_respondents
 
+        logger.debug(f"Initializing new Respondent with userid={userid}, wordlist_file={wordlist_file}")
+
         self.items = []
         self.id = total_respondents
         self.userid = None
         if isinstance(userid, str):
             self.userid = userid
+            logger.debug(f"Set userid to: {userid}")
         self.wordlist = None
         if isinstance(wordlist_file, str):
+            logger.info(f"Loading wordlist from file: {wordlist_file}")
             wordlist = Wordlist(wordlist_file)
             self.add_wordlist(wordlist)
 
@@ -54,6 +62,7 @@ class Respondent:
         self.totals = {}
         self.col_names = []
 
+        logger.info(f"Created Respondent {self.id} (userid: {self.userid or 'None'})")
         return
 
     def __str__(self) -> str:
@@ -124,11 +133,15 @@ class Respondent:
                 Returns:
                         item (Item): The new item that was created.
         '''
+        logger.debug(f"Adding item to Respondent {self.id}. Sentences: {len(sentences)} provided")
+        
         if len(sentences) == 1 and isinstance(sentences[0], Item):
             item = sentences[0]
+            logger.debug("Using existing Item object")
         else:
             item = Item(*sentences)
             item.add_wordlist(self.wordlist)
+            logger.debug("Created new Item from sentences")
         
         if 'index' not in item.scores.keys():
             item.add_additional_info("index", len(self.items)+1)
@@ -137,6 +150,7 @@ class Respondent:
             item.add_wordlist(self.wordlist)
             
         self.items.append(item)
+        logger.info(f"Added item {len(self.items)} to Respondent {self.id}")
         return item
 
     
@@ -150,8 +164,8 @@ class Respondent:
                 Returns:
 
         '''
+        logger.debug(f"Adding additional info to Respondent {self.id}: {id} = {data}")
         self.totals[id] = data
-
         return
 
 
@@ -166,24 +180,34 @@ class Respondent:
                 Returns:
 
         '''
+        logger.info(f"Scoring Respondent {self.id} with {len(modules)} modules")
+        
         for module in modules:
+            logger.debug(f"Applying module: {getattr(module, 'id', str(module))} (type: {getattr(module, 'type', 'unknown')})")
+            
             if module.type == "per item":
                 #total = 0
-                for item in self.items:
+                for i, item in enumerate(self.items):
+                    logger.debug(f"Scoring item {i+1} with module {getattr(module, 'id', str(module))}")
                     item.score(module)
                     #total += item.scores[module.id]
             elif module.type == "per respondent":
+                logger.debug(f"Applying per-respondent module: {getattr(module, 'id', str(module))}")
                 for item in self.items:
                     item.scores[module.id] = 0
                 total = module.execute(self.items, self.wordlist)
             #self.modules_ran.add(module.id)
                 self.totals[module.id] = total
+                logger.debug(f"Per-respondent module result: {total}")
+                
         self.compute_totals()
-
+        logger.info(f"Completed scoring for Respondent {self.id}")
         return
 
     def compute_totals(self):
+        logger.debug(f"Computing totals for Respondent {self.id}")
         if len(self.items) < 1:
+            logger.warning(f"No items found for Respondent {self.id}, cannot compute totals")
             return
         for ids in self.items[0].scores.keys():
             total = 0
@@ -191,6 +215,7 @@ class Respondent:
                 total += item.scores[ids]
             if total != 0 or ids not in self.totals.keys():
                 self.totals[ids] = total
+        logger.debug(f"Computed totals for {len(self.totals)} scoring methods")
 
     def add_wordlist(self, wordlist: Wordlist) -> None:
         '''
@@ -201,9 +226,11 @@ class Respondent:
                 Returns:
 
         '''
+        logger.info(f"Setting wordlist for Respondent {self.id}")
         self.wordlist = wordlist
-        for item in self.items:
+        for i, item in enumerate(self.items):
+            logger.debug(f"Adding wordlist to item {i+1}")
             item.add_wordlist(wordlist)
+        logger.debug(f"Wordlist added to {len(self.items)} items")
         return
 
-    

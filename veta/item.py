@@ -1,6 +1,10 @@
 from veta.wordlist import Wordlist
 from veta.scoring_modules.scoring_module import ScoringModule
+from veta.logger import get_logger
 import inspect
+
+# Initialize logger for this module
+logger = get_logger('item')
 
 class Item:
     """
@@ -45,6 +49,8 @@ class Item:
                 Returns:
 
         '''
+        logger.debug(f"Initializing Item with self_sentence length: {len(self_sentence)}, other_sentence length: {len(other_sentence)}")
+        
         self.raw_input = self_sentence +". " + other_sentence
         self.full_sentence = self.clean_sentence(self.raw_input)
         self.self_sentence = self.clean_sentence(self_sentence)
@@ -53,6 +59,7 @@ class Item:
 
         self.wordlist = None
 
+        logger.info(f"Created Item with full_sentence: '{self.full_sentence[:50]}{'...' if len(self.full_sentence) > 50 else ''}'")
         return
 
     def __str__(self):
@@ -80,6 +87,7 @@ class Item:
                 Returns:
 
         '''
+        logger.debug(f"Adding additional info to Item: {id} = {info}")
         self.scores[id] = info
         return
 
@@ -109,21 +117,31 @@ class Item:
                 Returns:
 
         '''
-        if len(inspect.signature(scoring_module.execute).parameters) < 2:
-            scres = scoring_module.execute(self)
-
-        elif isinstance(self.wordlist, Wordlist):
-
-            scres = scoring_module.execute(self, self.wordlist)
-        else:
-            raise Exception("Scoring Error: Item does not have a wordlist")
+        module_id = getattr(scoring_module, 'id', str(scoring_module))
+        logger.debug(f"Scoring Item with module: {module_id}")
         
-        if isinstance(scres,tuple):
-            for i in range(len(scres)):
-                self.scores[scoring_module.id+str(i+1)] = scres[i]
-        else:
-            self.scores[scoring_module.id] = scres
-        
+        try:
+            if len(inspect.signature(scoring_module.execute).parameters) < 2:
+                scres = scoring_module.execute(self)
+                logger.debug(f"Executed module {module_id} without wordlist")
+            elif isinstance(self.wordlist, Wordlist):
+                scres = scoring_module.execute(self, self.wordlist)
+                logger.debug(f"Executed module {module_id} with wordlist")
+            else:
+                logger.error(f"Scoring Error: Item does not have a wordlist for module {module_id}")
+                raise Exception("Scoring Error: Item does not have a wordlist")
+            
+            if isinstance(scres,tuple):
+                logger.debug(f"Module {module_id} returned tuple with {len(scres)} values")
+                for i in range(len(scres)):
+                    self.scores[scoring_module.id+str(i+1)] = scres[i]
+            else:
+                logger.debug(f"Module {module_id} returned single value: {scres}")
+                self.scores[scoring_module.id] = scres
+                
+        except Exception as e:
+            logger.error(f"Error scoring Item with module {module_id}: {str(e)}")
+            raise
         
         return
 
@@ -136,8 +154,9 @@ class Item:
                 Returns:
 
         '''
+        logger.debug("Adding wordlist to Item")
         self.wordlist = wordlist
         return
-        
-    
+
+
 
