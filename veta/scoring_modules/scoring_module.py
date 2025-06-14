@@ -1,7 +1,11 @@
 import numpy as np
 from veta.wordlist import Wordlist
+from veta.logger import get_logger
 import re
 from collections import defaultdict
+
+# Initialize logger for scoring modules
+logger = get_logger('scoring_module')
 
 class ScoringModule:
     """
