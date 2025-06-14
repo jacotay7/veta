@@ -3,7 +3,11 @@ import numpy as np
 import datetime
 import re 
 import random
-import string 
+import string
+from veta.logger import get_logger
+
+# Initialize logger for this module
+logger = get_logger('wordlist')
 
 def is_number(s):
     """
@@ -46,14 +50,20 @@ class Wordlist:
                 Returns:
 
         '''
+        logger.info(f"Initializing Wordlist from file: {filename}")
         self.unique_id = ''.join(random.sample(string.ascii_uppercase, 26))
         self.filename = filename
         self.creator = creator
         self.name = name
         self.language = language
+        
+        logger.debug(f"Loading wordlist data from file")
         self.loadFromFile(filename)
         
+        logger.debug("Cleaning wordlist data")
         self.cleanWordlist()
+        
+        logger.info(f"Wordlist initialized with {len(self.words)} words")
         # w, s, sb = [], [], []
 
         # #
@@ -78,20 +88,32 @@ class Wordlist:
                 Returns:
                         wordlist (numpy.array): the contents of the wordlist file given as as numpy array
         '''
-        if filename.endswith(".txt"):
-            self.words, self.scores = self.loadFromTxt(filename)
-            self.subclasses = np.zeros_like(self.scores)
-        elif filename.endswith(".xlsx") or filename.endswith(".xls"):
-            data = np.array(pd.read_excel(filename, engine='openpyxl'))
-            self.words = data[:,0]
-            self.scores = data[:,1]
-            if data.shape[1] > 2:
-                self.subclasses = data[:,2]
-            else:
+        logger.debug(f"Loading wordlist from file: {filename}")
+        
+        try:
+            if filename.endswith(".txt"):
+                logger.debug("Loading from text file")
+                self.words, self.scores = self.loadFromTxt(filename)
                 self.subclasses = np.zeros_like(self.scores)
-            return 
-        else:
-            raise Exception("File Type not Supported. Please use .txt or .xlsx")
+            elif filename.endswith(".xlsx") or filename.endswith(".xls"):
+                logger.debug("Loading from Excel file")
+                data = np.array(pd.read_excel(filename, engine='openpyxl'))
+                self.words = data[:,0]
+                self.scores = data[:,1]
+                if data.shape[1] > 2:
+                    self.subclasses = data[:,2]
+                    logger.debug("Loaded subclasses from third column")
+                else:
+                    self.subclasses = np.zeros_like(self.scores)
+                    logger.debug("No subclasses found, using zeros")
+                return 
+            else:
+                logger.error(f"Unsupported file type: {filename}")
+                raise Exception("File Type not Supported. Please use .txt or .xlsx")
+                
+        except Exception as e:
+            logger.error(f"Error loading wordlist from {filename}: {str(e)}")
+            raise
 
     def __str__(self):
 

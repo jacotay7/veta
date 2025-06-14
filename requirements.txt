@@ -9,6 +9,7 @@ requests>=2.25.0
 seaborn>=0.11.0
 scikit-learn>=1.0.0
 scipy>=1.7.0
+colorama>=0.4.0
 
 # Testing dependencies
 pytest>=7.0.0

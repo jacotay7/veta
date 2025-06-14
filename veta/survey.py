@@ -3,6 +3,7 @@ import openpyxl
 from veta.item import Item
 from veta.respondent import Respondent
 from veta.wordlist import Wordlist
+from veta.logger import get_logger
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,6 +12,9 @@ from sklearn.metrics import confusion_matrix
 import os 
 import json
 from scipy.stats import norm
+
+# Initialize logger for this module
+logger = get_logger('survey')
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -42,9 +46,12 @@ class Survey:
     
     """
     def __init__(self, wordlist_file=None) -> None:
+        logger.debug(f"Initializing Survey with wordlist_file: {wordlist_file}")
+        
         self.respondents = []
         self.wordlist = None
         if isinstance(wordlist_file,str):
+            logger.info(f"Loading wordlist from file: {wordlist_file}")
             wordlist = Wordlist(wordlist_file)
             self.add_wordlist(wordlist)
 
@@ -52,6 +59,8 @@ class Survey:
         self.num_item_cols = 0
         self.summary = {}
         self.header = np.array(["ID", "Self", "Other"])
+        
+        logger.info("Survey initialized successfully")
         return
 
     def __str__(self) -> str:
@@ -137,27 +146,43 @@ class Survey:
         return        
 
     def from_file(self, filename, layout='vertical'):
+        logger.info(f"Loading survey data from file: {filename} (layout: {layout})")
 
         # Get the file extension
         file_extension = os.path.splitext(filename)[1]
+        logger.debug(f"File extension detected: {file_extension}")
         
         # Check the file extension and read the file accordingly
-        if file_extension == '.csv':
-            data = np.array(pd.read_csv(filename, header=None))
-        elif file_extension in ['.xls', '.xlsx']:
-            data = np.array(pd.read_excel(filename, header=None, engine='openpyxl'))
-        elif file_extension in ['.json']:
-            self.from_json(filename)
-            return
-        else:
-            raise ValueError(f"Unsupported file extension: {file_extension}")
+        try:
+            if file_extension == '.csv':
+                logger.debug("Reading CSV file")
+                data = np.array(pd.read_csv(filename, header=None))
+            elif file_extension in ['.xls', '.xlsx']:
+                logger.debug("Reading Excel file")
+                data = np.array(pd.read_excel(filename, header=None, engine='openpyxl'))
+            elif file_extension in ['.json']:
+                logger.debug("Reading JSON file")
+                self.from_json(filename)
+                return
+            else:
+                logger.error(f"Unsupported file extension: {file_extension}")
+                raise ValueError(f"Unsupported file extension: {file_extension}")
+                
+            logger.info(f"Successfully loaded data with shape: {data.shape}")
+            
+        except Exception as e:
+            logger.error(f"Error reading file {filename}: {str(e)}")
+            raise
 
         if str(layout).lower() == "vertical":
+            logger.debug("Processing vertical layout")
             self.from_vertical_layout(data)
         elif str(layout).lower() == "horizontal":
+            logger.debug("Processing horizontal layout")
             self.from_horizontal_layout(data)
 
         self.add_wordlist(self.wordlist)
+        logger.info(f"Survey loaded with {len(self.respondents)} respondents")
 
         return
     
@@ -171,15 +196,22 @@ class Survey:
         return
 
     def add_respondent(self, respondent):
+        logger.info(f"Adding respondent {getattr(respondent, 'id', 'unknown')} to survey")
         self.respondents.append(respondent)
         if not (self.wordlist is None):
+            logger.debug("Adding wordlist to new respondent")
             respondent.add_wordlist(self.wordlist)
+        logger.debug(f"Survey now has {len(self.respondents)} respondents")
         return
 
     def score(self,*modules):
-
-        for respondent in self.respondents:
+        logger.info(f"Scoring survey with {len(modules)} modules across {len(self.respondents)} respondents")
+        
+        for i, respondent in enumerate(self.respondents):
+            logger.debug(f"Scoring respondent {i+1}/{len(self.respondents)} (ID: {getattr(respondent, 'id', 'unknown')})")
             respondent.score(*modules)
+            
+        logger.info("Survey scoring completed")
 
     def compute_summary(self, percentiles=False):
 
