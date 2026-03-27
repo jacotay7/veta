@@ -1,3 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "veta"
+version = "1.0.0"
+description = "A text-based emotion assessment tool to electronically score LEAS (Levels of Emotional Awareness Scale) surveys."
+readme = "README.md"
+authors = [
+    { name = "Jacob Taylor", email = "jacob.taylor@mail.utoronto.ca" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: MacOS X",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "spacy",
+    "vaderSentiment",
+    "openpyxl",
+    "requests",
+    "seaborn",
+    "scikit-learn",
+]
+
+[project.urls]
+Homepage = "https://github.com/jacotay7/veta"
+
+[tool.setuptools]
+packages = ["veta", "veta.scoring_modules"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

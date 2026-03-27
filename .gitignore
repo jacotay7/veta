@@ -120,3 +120,5 @@ coverage.xml
 *_pid.txt
 rec_0001*
 *.log
+
+scratch/
