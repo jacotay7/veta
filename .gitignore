@@ -122,3 +122,5 @@ rec_0001*
 *.log
 
 scratch/
+build/
+veta.egg-info/

@@ -250,6 +250,23 @@ class TestScoringModule:
         # Should find 'happy'
         assert 'happy' in matching_words
 
+    def test_match_words_escapes_regex_metacharacters(self):
+        """Test that regex metacharacters in wordlist entries are matched literally"""
+        module = ScoringModule()
+
+        mock_wordlist = Mock()
+        mock_wordlist.words = np.array(['a+b', 'sad'])
+        mock_wordlist.scores = np.array([4, 2])
+        mock_wordlist.subclasses = np.array([0, 0])
+        mock_wordlist.unique_id = 'regex-test-wordlist'
+
+        sentence = 'a+b sad'
+
+        frequency, matching_words, scores = module.match_words(sentence, mock_wordlist)
+
+        assert 'a+b' in matching_words
+        assert 'sad' in matching_words
+
     def test_scoring_module_language_support(self):
         """Test language parameter support"""
         # Test if language parameter is supported in initialization
