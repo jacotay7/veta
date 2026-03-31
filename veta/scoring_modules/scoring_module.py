@@ -261,21 +261,22 @@ class ScoringModule:
             return
 
         # Prepare the special characters pattern
-        acceptable_prev_chars_pattern = '[' + self.acceptable_prev_chars + ']?'
-        acceptable_next_chars_pattern = '[' + self.acceptable_next_chars + ']?'
+        acceptable_prev_chars_pattern = '[' + re.escape(self.acceptable_prev_chars) + ']?'
+        acceptable_next_chars_pattern = '[' + re.escape(self.acceptable_next_chars) + ']?'
 
         # Build individual regex patterns for each word/phrase
         patterns = []
         for word in words_sorted:
+            escaped_word = re.escape(str(word))
             # Allow special characters before the first word of the phrase
             if len(self.acceptable_prev_chars) > 0:
-                word_pattern = '\\b' + acceptable_prev_chars_pattern + word + '\\b'
+                word_pattern = '\\b' + acceptable_prev_chars_pattern + escaped_word + '\\b'
                 patterns.append(word_pattern)
             if len(self.acceptable_next_chars) > 0:
-                word_pattern = '\\b' + word + acceptable_next_chars_pattern + '\\b'
+                word_pattern = '\\b' + escaped_word + acceptable_next_chars_pattern + '\\b'
                 patterns.append(word_pattern)
             # if len(self.acceptable_prev_chars) == 0 and len(self.acceptable_next_chars) == 0:
-            word_pattern = '\\b' + word + '\\b'
+            word_pattern = '\\b' + escaped_word + '\\b'
             patterns.append(word_pattern)
         """
         Allow missing spaces between words, is much slower
@@ -283,7 +284,7 @@ class ScoringModule:
         if self.language == 'he':
             for word in words_sorted:
                 if len(word) > 2:
-                    patterns.append(word)
+                    patterns.append(re.escape(str(word)))
         self.patterns = patterns
         # Combine individual patterns into one regex pattern
         combined_pattern = '|'.join(patterns)
