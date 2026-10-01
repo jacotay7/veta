@@ -7,7 +7,13 @@ To use veta, you will need to install Python 3 and the Package Installer for Pyt
 
 # Installation
 
-Clone the repository, navigate to the veta folder on your computer (the folder should contan the setup.py file) and run:
+veta is not published on PyPI (the `veta` name there belongs to an unrelated project). Install it from GitHub:
+
+```
+pip install git+https://github.com/jacotay7/veta.git
+```
+
+or clone the repository and, from the folder containing `pyproject.toml`, run:
 
 ```
 pip install .
