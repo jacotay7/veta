@@ -127,16 +127,8 @@ security:
 
 # Package building
 build:
-	python setup.py sdist bdist_wheel
+	python -m build
 	@echo "Package built in dist/"
-
-# Upload to PyPI (test)
-upload-test:
-	twine upload --repository testpypi dist/*
-
-# Upload to PyPI
-upload:
-	twine upload dist/*
 
 # Run all quality checks
 qa: lint typecheck test-coverage security
